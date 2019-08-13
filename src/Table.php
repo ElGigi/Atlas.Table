@@ -201,10 +201,10 @@ abstract class Table
 
         $pdoStatement = $update->perform();
 
-        $rowCount = $pdoStatement->rowCount();
-        if ($rowCount != 1) {
-            throw Exception::unexpectedRowCountAffected($rowCount);
-        }
+//        $rowCount = $pdoStatement->rowCount();
+//        if ($rowCount != 1) {
+//            throw Exception::unexpectedRowCountAffected($rowCount);
+//        }
 
         $this->tableEvents->afterUpdateRow($this, $row, $update, $pdoStatement);
 
