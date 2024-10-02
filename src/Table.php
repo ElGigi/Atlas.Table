@@ -181,9 +181,11 @@ abstract class Table
         $update = $this->update();
         foreach (static::PRIMARY_KEY as $primaryCol) {
             if (array_key_exists($primaryCol, $diff)) {
-                throw Exception::primaryValueChanged($primaryCol);
+                $message = "Primary key value for '$primaryCol' changed";
+                throw new Exception($message);
             }
-            $update->where("{$primaryCol} = ", $row->$primaryCol);
+            $qPrimaryCol = $update->quoteIdentifier($primaryCol);
+            $update->where("{$qPrimaryCol} = ", $row->$primaryCol);
             unset($diff[$primaryCol]);
         }
         $update->columns($diff);
@@ -196,10 +198,6 @@ abstract class Table
     {
         if (! $update->hasColumns()) {
             return null;
-        }
-
-        if (empty(static::PRIMARY_KEY)) {
-            throw Exception::cannotPerformWithoutPrimaryKey('update row', static::NAME);
         }
 
         $pdoStatement = $update->perform();
@@ -235,7 +233,8 @@ abstract class Table
 
         $delete = $this->delete();
         foreach (static::PRIMARY_KEY as $primaryCol) {
-            $delete->where("{$primaryCol} = ", $row->$primaryCol);
+            $qPrimaryCol = $delete->quoteIdentifier($primaryCol);
+            $delete->where("{$qPrimaryCol} = ", $row->$primaryCol);
         }
 
         $this->tableEvents->modifyDeleteRow($this, $row, $delete);
@@ -246,10 +245,6 @@ abstract class Table
     {
         if ($row->getStatus() === $row::DELETED) {
             return null;
-        }
-
-        if (empty(static::PRIMARY_KEY)) {
-            throw Exception::cannotPerformWithoutPrimaryKey('delete row', static::NAME);
         }
 
         $pdoStatement = $delete->perform();
